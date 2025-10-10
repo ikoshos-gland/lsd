@@ -56,6 +56,8 @@ mamba activate lsd_env
 pip install lsds
 ```
 
+* for more lightweight package with simple functions to create lsds and affinities, see [lsd-lite](https://github.com/funkelab/lsd-lite) (or simply install with `pip install lsd-lite`)
+
 * [conda repo](https://github.com/conda-forge/lsds-feedstock), [pypi page](https://pypi.org/project/lsds/0.1.2/)
 
 * Tested on Ubuntu 18.04 with Python 3. 
