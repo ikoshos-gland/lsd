@@ -269,10 +269,13 @@ def start_worker(
     worker_command = os.path.join('.', worker)
 
     base_command = [
-        'bsub',
-        '-n', '1',
-        '-o', f'{log_out}',
-        f'python {worker_command} {config_file} > {log_out}'
+        'sbatch',
+        '--ntasks=1',
+        '--cpus-per-task=1',
+        '--output=' + f'{log_out}',
+        '--error=' + f'{log_err}',
+        '--wrap',
+        f'python {worker_command} {config_file}'
     ]
 
     logging.info(f'Base command: {base_command}')

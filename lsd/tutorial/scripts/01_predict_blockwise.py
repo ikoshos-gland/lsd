@@ -328,11 +328,13 @@ def predict_worker(
 
     # create worker command
     command = [
-        'bsub',
-        '-n', str(worker_config['num_cpus']),
-        '-o', f'{log_out}',
-        '-gpu', 'num=1',
-        '-q', worker_config['queue']
+        'sbatch',
+        '--ntasks=1',
+        '--cpus-per-task=' + str(worker_config['num_cpus']),
+        '--output=' + f'{log_out}',
+        '--error=' + f'{log_err}',
+        '--gres=gpu:1',
+        '--partition=' + worker_config['queue']
     ]
 
     if singularity_image is not None:
