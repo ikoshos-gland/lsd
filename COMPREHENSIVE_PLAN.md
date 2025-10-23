@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-This plan details the complete workflow from manually segmented EM data to fully automated neuron segmentation using the AutoContext RLSD (AcrLSD) approach deployed on Azure CycleCloud with SLURM. The workflow consists of two main phases:
+This plan details the complete workflow from manually segmented ExM data to fully automated neuron segmentation using the AutoContext RLSD (AcrLSD) approach deployed on Azure CycleCloud with SLURM. The workflow consists of two main phases:
 
 1. **Training Phase**: Train two neural networks (LSD network → AcrLSD network)
 2. **Inference Phase**: Distributed prediction and post-processing on large volumes
