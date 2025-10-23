@@ -8,7 +8,7 @@ This plan details the complete workflow from manually segmented ExM data to full
 2. **Inference Phase**: Distributed prediction and post-processing on large volumes
 
 **Estimated Timeline**: 4-6 weeks (assuming data is ready)
-**Prerequisites**: Manually segmented EM training data, Azure subscription, basic Python knowledge
+**Prerequisites**: Manually segmented ExM training data, Azure subscription, basic Python knowledge
 
 ---
 
@@ -52,7 +52,7 @@ This plan details the complete workflow from manually segmented ExM data to full
 - Azure CycleCloud instance
 
 **Data Requirements**:
-- **Training data**: 2-4 manually segmented EM volumes
+- **Training data**: 2-4 manually segmented ExM volumes
 - **Minimum volume size**: 250×250×250 voxels each
 - **Recommended volume size**: 512×512×512 voxels each
 - **Voxel resolution**: Consistent across all volumes (e.g., 8×8×8 nm)
@@ -63,7 +63,7 @@ This plan details the complete workflow from manually segmented ExM data to full
 **Required Skills**:
 - Basic command-line navigation (cd, ls, mkdir)
 - Basic Python (no coding required, just running scripts)
-- Understanding of your EM data (resolution, format, segmentation labels)
+- Understanding of your ExM data (resolution, format, segmentation labels)
 
 **Helpful but Not Required**:
 - Deep learning concepts
@@ -91,7 +91,7 @@ The LSD pipeline requires training data in **Zarr format** with specific structu
 ```
 training_volume.zarr/
 ├── volumes/
-│   ├── raw/               # Raw EM data (uint8 or float32)
+│   ├── raw/               # Raw ExM data (uint8 or float32)
 │   └── labels/
 │       ├── neuron_ids/    # Instance segmentation (uint64)
 │       └── mask/          # Training mask (uint8: 1=train, 0=ignore)
@@ -364,7 +364,7 @@ GPU devices: [PhysicalDevice(name='/physical_device:GPU:0', device_type='GPU')]
 
 ### 3.1 Understand LSD Training Objective
 
-**Goal**: Train a U-Net to predict 10-channel Local Shape Descriptors (LSDs) from raw EM data.
+**Goal**: Train a U-Net to predict 10-channel Local Shape Descriptors (LSDs) from raw ExM data.
 
 **LSDs encode local shape information**:
 - Channels 0-2: Mean offsets to object center (z, y, x)
@@ -439,7 +439,7 @@ num_output_channels = 10        # 10 LSD components
 
 **Network structure**:
 ```
-Input: (1, 196, 196, 196) - raw EM
+Input: (1, 196, 196, 196) - raw ExM
   ↓ U-Net encoder-decoder
 Output: (10, 92, 92, 92) - LSDs
 ```
@@ -674,7 +674,7 @@ echo "Best LSD checkpoint: train_net_checkpoint_${BEST_LSD_CHECKPOINT}"
 
 **Network architecture**:
 ```
-Input 1: Raw EM (1 channel)           → Cropped to 196³
+Input 1: Raw ExM (1 channel)           → Cropped to 196³
 Input 2: Predicted LSDs (10 channels) → From Stage 1 network
   ↓ Concatenate (11 channels total)
   ↓ U-Net encoder-decoder
@@ -787,7 +787,7 @@ Predict(
         'train_net_checkpoint_%d' % config['lsds_iteration']),  # e.g., 300000
     graph='train_auto_net.meta',
     inputs={
-        sd_config['raw']: raw      # Feed raw EM to LSD network
+        sd_config['raw']: raw      # Feed raw ExM to LSD network
     },
     outputs={
         sd_config['embedding']: pretrained_lsd  # Get LSD predictions
@@ -797,9 +797,9 @@ Predict(
 
 **What this does**:
 1. During training, for each batch:
-   - Run LSD network inference on raw EM (using checkpoint from Stage 1)
+   - Run LSD network inference on raw ExM (using checkpoint from Stage 1)
    - Get 10-channel LSD predictions
-   - Concatenate with raw EM (11 channels total)
+   - Concatenate with raw ExM (11 channels total)
    - Train affinity network on this concatenated input
 
 **Full pipeline**:
