@@ -326,27 +326,26 @@ def predict_worker(
 
     logging.info('Running block with config %s...'%config_file)
 
-    # create worker command
+    # create worker command (SLURM)
     command = [
-        'bsub',
-        '-n', str(worker_config['num_cpus']),
-        '-o', f'{log_out}',
-        '-gpu', 'num=1',
-        '-q', worker_config['queue']
+        'sbatch',
+        '--cpus-per-task=' + str(worker_config['num_cpus']),
+        '--output=' + log_out,
+        '--error=' + log_err,
+        '--gres=gpu:1',
+        '--partition=' + worker_config['queue'],
+        '--wrap='
     ]
 
+    # Build the wrapped command string
+    wrapped_command = ''
     if singularity_image is not None:
-        command += [
-                'singularity exec',
-                '-B', '/groups',
-                '--nv', singularity_image
-            ]
+        wrapped_command = 'singularity exec -B /groups --nv %s ' % singularity_image
 
-    command += [
-        'python -u %s %s'%(
-            predict_script,
-            config_file
-        )]
+    wrapped_command += 'python -u %s %s' % (predict_script, config_file)
+
+    # Add the wrapped command as a single string
+    command[-1] = '--wrap=' + wrapped_command
 
     logging.info(f'Worker command: {command}')
 

@@ -191,11 +191,14 @@ def start_worker(
 
     worker_command = os.path.join('.', worker)
 
+    # SLURM command with partition/queue support (bug fix: now uses queue parameter)
     base_command = [
-        'bsub',
-        '-n', '1',
-        '-o', f'{log_out}',
-        f'python {worker_command} {config_file} > {log_out}'
+        'sbatch',
+        '--cpus-per-task=1',
+        '--output=' + log_out,
+        '--error=' + log_err,
+        '--partition=' + queue,
+        '--wrap=python ' + worker_command + ' ' + config_file
     ]
 
     logging.info(f'Base command: {base_command}')

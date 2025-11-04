@@ -64,7 +64,7 @@ pip install lsds
 
 * This is not production level software and was developed in a pure research environment. Therefore some scripts may not work out of the box. For example, all paper networks were originally written using now deprecated tensorflow/cudnn versions and rely on an outdated singularity container. Because of this, the singularity image will not build from the current recipe - if replicating with the current implementations, please reach out for the singularity container (it is too large to upload here). Alternatively, consider reimplementing networks in pytorch (recommended - see [Training](https://github.com/funkelab/lsd/edit/master/README.md#training)). 
 
-* Post-proccesing steps were designed for use with a specific cluster and will need to be tweaked for individual use cases. If the need / use increases then we will look into refactoring, packaging and distributing.
+* Post-processing steps use SLURM for cluster job submission. Partition names (gpu, compute, hpc) can be specified via the `queue` parameter. These may need to be tweaked for individual cluster configurations.
 
 * Currently, several post-processing scripts (e.g [watershed](https://github.com/funkelab/lsd/blob/master/lsd/post/fragments.py)) are located inside this repo which creates more dependencies than needed for using the lsds. One forseeable issue is that agglomeration requires networkx==2.2 for the MergeTree and boost is required for `funlib.segment`. We have restructured the repo to use `lsd.train` and `lsd.post` submodules. For just calculating the lsds, it is sufficient to use `lsd.train`, e.g:
 
@@ -142,7 +142,7 @@ tutorial: [![Open In Colab](https://colab.research.google.com/assets/colab-badge
   
 ### Inference
  
-* By default, the predict scripts ([example](https://github.com/funkelab/lsd/blob/tutorial/lsd/tutorial/example_nets/fib25/mtlsd/predict.py)) contain the worker logic to be distributed by the scheduler during parallel processing (see below).
+* By default, the predict scripts ([example](https://github.com/funkelab/lsd/blob/tutorial/lsd/tutorial/example_nets/fib25/mtlsd/predict.py)) contain the worker logic to be distributed by SLURM during parallel blockwise processing (see below).
  
 * If you just need to process a relatively small volume, it is sometimes not necessary to use blockwise processing. In this case, it is recommended to use a [scan node](http://funkey.science/gunpowder/api.html#scan), and specify input/output shapes + context. An example can be found in the inference colab notebook above.
  
