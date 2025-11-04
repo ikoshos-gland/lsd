@@ -1,0 +1,12 @@
+{
+    "job_id": 4400,
+    "partition": "gpu",
+    "ntasks": 1,
+    "cpus": 5,
+    "gres": "gpu:1",
+    "output": "/tmp/acrlsd_test_logs/predict_test.out",
+    "error": "/tmp/acrlsd_test_logs/predict_test.err",
+    "command": " bash -c echo "AcrLSD prediction worker started"; echo "Worker ID: $$"; sleep 2; echo "Mock prediction complete"; exit 0",
+    "status": "RUNNING",
+    "submit_time": "1762280130"
+}

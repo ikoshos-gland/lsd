@@ -1,0 +1,13 @@
+{
+    "job_id": 2683,
+    "partition": "gpu",
+    "ntasks": 1,
+    "cpus": 1,
+    "gres": "",
+    "output": "/tmp/test_job.out",
+    "error": "/tmp/test_job.err",
+    "command": " /tmp/test_job.sh",
+    "status": "COMPLETED",
+    "submit_time": "1762280127"
+}
+"exit_code": 0, "end_time": 1762280129

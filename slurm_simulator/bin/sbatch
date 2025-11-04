@@ -1,0 +1,100 @@
+#!/bin/bash
+# Mock sbatch - simulates SLURM job submission
+
+SLURM_DIR="/home/user/lsd/slurm_simulator"
+JOBS_DIR="$SLURM_DIR/jobs"
+LOGS_DIR="$SLURM_DIR/logs"
+
+# Generate unique job ID
+JOB_ID=$((RANDOM % 10000 + 1000))
+
+# Parse command line arguments
+OUTPUT_FILE=""
+ERROR_FILE=""
+PARTITION=""
+NTASKS=1
+CPUS=1
+GRES=""
+COMMAND=""
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --output=*)
+            OUTPUT_FILE="${1#*=}"
+            shift
+            ;;
+        --error=*)
+            ERROR_FILE="${1#*=}"
+            shift
+            ;;
+        --partition=*)
+            PARTITION="${1#*=}"
+            shift
+            ;;
+        --ntasks=*)
+            NTASKS="${1#*=}"
+            shift
+            ;;
+        --cpus-per-task=*)
+            CPUS="${1#*=}"
+            shift
+            ;;
+        --gres=*)
+            GRES="${1#*=}"
+            shift
+            ;;
+        *)
+            # Accumulate remaining arguments as the command
+            COMMAND="$COMMAND $1"
+            shift
+            ;;
+    esac
+done
+
+# Create job metadata
+cat > "$JOBS_DIR/job_${JOB_ID}.json" <<EOF
+{
+    "job_id": $JOB_ID,
+    "partition": "$PARTITION",
+    "ntasks": $NTASKS,
+    "cpus": $CPUS,
+    "gres": "$GRES",
+    "output": "$OUTPUT_FILE",
+    "error": "$ERROR_FILE",
+    "command": "$COMMAND",
+    "status": "PENDING",
+    "submit_time": "$(date +%s)"
+}
+EOF
+
+# Output job ID (like real sbatch)
+echo "Submitted batch job $JOB_ID"
+
+# Execute job in background
+(
+    # Update status to RUNNING
+    sed -i 's/"status": "PENDING"/"status": "RUNNING"/' "$JOBS_DIR/job_${JOB_ID}.json"
+
+    # Create output/error files if specified
+    mkdir -p "$(dirname "$OUTPUT_FILE")" 2>/dev/null
+    mkdir -p "$(dirname "$ERROR_FILE")" 2>/dev/null
+
+    # Execute the command
+    START_TIME=$(date +%s)
+    eval $COMMAND > "$OUTPUT_FILE" 2> "$ERROR_FILE"
+    EXIT_CODE=$?
+    END_TIME=$(date +%s)
+
+    # Update status based on exit code
+    if [ $EXIT_CODE -eq 0 ]; then
+        STATUS="COMPLETED"
+    else
+        STATUS="FAILED"
+    fi
+
+    sed -i "s/\"status\": \"RUNNING\"/\"status\": \"$STATUS\"/" "$JOBS_DIR/job_${JOB_ID}.json"
+    echo "\"exit_code\": $EXIT_CODE, \"end_time\": $END_TIME" >> "$JOBS_DIR/job_${JOB_ID}.json"
+
+) &
+
+exit 0

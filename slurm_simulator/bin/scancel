@@ -1,0 +1,14 @@
+#!/bin/bash
+# Mock scancel - cancels jobs
+
+JOBS_DIR="/home/user/lsd/slurm_simulator/jobs"
+JOB_ID=$1
+
+if [ -f "$JOBS_DIR/job_${JOB_ID}.json" ]; then
+    sed -i 's/"status": "PENDING"/"status": "CANCELLED"/' "$JOBS_DIR/job_${JOB_ID}.json"
+    sed -i 's/"status": "RUNNING"/"status": "CANCELLED"/' "$JOBS_DIR/job_${JOB_ID}.json"
+    echo "Job $JOB_ID cancelled"
+else
+    echo "Job $JOB_ID not found"
+    exit 1
+fi

@@ -1,0 +1,6 @@
+#!/bin/bash
+# Mock sinfo - shows partition information
+
+echo "PARTITION AVAIL  TIMELIMIT  NODES  STATE NODELIST"
+echo "gpu*         up   infinite      1   idle localhost"
+echo "cpu          up   infinite      1   idle localhost"

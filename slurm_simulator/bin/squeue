@@ -1,0 +1,26 @@
+#!/bin/bash
+# Mock squeue - shows job queue status
+
+JOBS_DIR="/home/user/lsd/slurm_simulator/jobs"
+
+echo "JOBID PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)"
+
+for job_file in "$JOBS_DIR"/job_*.json; do
+    if [ -f "$job_file" ]; then
+        JOB_ID=$(grep -o '"job_id": [0-9]*' "$job_file" | cut -d' ' -f2)
+        PARTITION=$(grep -o '"partition": "[^"]*"' "$job_file" | cut -d'"' -f4)
+        STATUS=$(grep -o '"status": "[^"]*"' "$job_file" | cut -d'"' -f4)
+
+        # Convert status to SLURM format
+        case $STATUS in
+            PENDING) ST="PD" ;;
+            RUNNING) ST=" R" ;;
+            COMPLETED) continue ;;  # Don't show completed jobs
+            FAILED) continue ;;     # Don't show failed jobs
+            *) ST="UN" ;;
+        esac
+
+        printf "%5s %9s %8s %8s %2s %10s %6s %s\n" \
+            "$JOB_ID" "$PARTITION" "predict" "$USER" "$ST" "0:00" "1" "localhost"
+    fi
+done
